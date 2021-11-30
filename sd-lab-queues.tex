@@ -4,11 +4,11 @@
 
 \usepackage{common}
 
-\newcommand{\labN}{1}
+\newcommand{\labN}{8}
 \newcommand{\labGroup}{https://gitlab.com/pika-lab/courses/ds/ay2122}
 \newcommand{\labRepo}{\labGroup/lab-\labN}
 
-\title[L\labN{} -- Whatever]{L\labN{} -- Whatever}
+\title[L\labN{} -- Queues]{L\labN{} -- Queues}
 %
 \subtitle[SD]{Distributed Systems / Technologies}
 %
@@ -51,24 +51,58 @@
     % \end{multicols}
 \end{frame}
 
-\section{Motivation}
+\subsection{Queues}
 
-\begin{frame}[allowframebreaks]
-\frametitle{Motivation}
+\begin{frame}{Overview}
 
-    \begin{itemize}
-        \item Some motivation here
+    Yet another powerful mechanism for DS systems: \alert{queues}
+    %
+    \begin{columns}
+        \begin{column}{.26\linewidth}
+            \begin{center}
+                \includegraphics[width=\linewidth]{img/queue.png}
+            \end{center}
+        \end{column}
+        \hfill
+        \begin{column}{.72\linewidth}
+            \begin{itemize}
+                \item \alert{mono-directional}, like byte streams
+                %
+                \begin{itemize}
+                    \item two operations: enqueue \& dequeue
+                \end{itemize}
 
-    \end{itemize}
+                \smallskip
 
-\end{frame}
+                \item carrying discrete \alert{messages}, like RPC
+                %
+                \begin{itemize}
+                    \item serialized as byte chunks
+                \end{itemize}
 
-\section{Content}
+                \smallskip
 
-\subsection{Overview}
+                \item commonly \alert{buffered} \& unlimited
+                %
+                \begin{itemize}
+                    \item to support \alert{time-uncoupling}
+                \end{itemize}
 
-\begin{frame}{Content}
-    TBD
+                \smallskip
+
+                \item commonly, \alert{non-blocking}
+
+                \smallskip
+
+                \item commonly backed by ad-hoc \alert{protocols}
+                %
+                \begin{itemize}
+                    \item[eg] AMQT, MQTT, etc.
+                \end{itemize}
+            \end{itemize}
+        \end{column}
+    \end{columns}
+
 
 \end{frame}
 
@@ -140,3 +174,4 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
