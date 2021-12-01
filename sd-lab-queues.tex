@@ -51,11 +51,11 @@
     % \end{multicols}
 \end{frame}
 
-\subsection{Queues}
+\section{Queues}
 
 \begin{frame}{Overview}
 
-    Yet another powerful mechanism for DS systems: \alert{queues}
+    Yet another powerful abstraction for DS systems: \alert{queues}
     %
     \begin{columns}
         \begin{column}{.26\linewidth}
@@ -97,12 +97,208 @@
                 \item commonly backed by ad-hoc \alert{protocols}
                 %
                 \begin{itemize}
-                    \item[eg] AMQT, MQTT, etc.
+                    \item[eg] AMQP, MQTT, etc.
                 \end{itemize}
             \end{itemize}
         \end{column}
     \end{columns}
+\end{frame}
 
+\begin{frame}[allowframebreaks]{Producers, Consumers, Brokers}
+
+    \begin{block}{Major roles}
+        \begin{center}
+            Producers $\rightarrow$ Broker $\rightarrow$ Consumers
+        \end{center}
+        %
+        \begin{description}
+            \item[producers:] pro-actively enqueuing messages into queues
+            \item[consumers:] dequeuing messages from queues
+            %
+            \begin{itemize}
+                \item either pro-actively or reactively
+            \end{itemize}
+            \item[brokers:] buffering queues' messages while ``in transit''
+        \end{description}
+    \end{block}
+    %
+    \begin{center}
+        \includegraphics[width=\linewidth]{img/broker.png}
+    \end{center}
+
+    \framebreak
+
+    \begin{block}{A \textbf{broker}\ldots}
+        %
+        \begin{itemize}
+            \item is needed to support \alert{time uncoupling}
+            \item relies upon some \alert{message queueing} protocol (e.g. AMQP)
+            %
+            \begin{itemize}
+                \item natural support for messages and acks + QoS guarantees
+            \end{itemize}
+            \item is an \alert{infrastructural} component
+            %
+            \begin{itemize}
+                \item[ie] it should not appear in the abstract design of a system
+            \end{itemize}
+        \end{itemize}
+    \end{block}
+
+    \framebreak
+
+    \begin{alertblock}{Notice that}
+        \begin{itemize}
+            \item technically, both producers and consumers are \alert{clients} w.r.t. the broker
+            \item depending on your design producers and consumers may act as:
+            %
+            \begin{itemize}
+                \item service providers or consumers
+                \item or peers
+            \end{itemize}
+        \end{itemize}
+    \end{alertblock}
+
+\end{frame}
+
+\section{RabbitMQ}
+
+\begin{frame}{Overview \hfill \uurl{https://www.rabbitmq.com/}}
+
+    \begin{itemize}
+        \item Very mature MQ broker technology based on AMQP
+
+        \vfill
+
+        \item Supporting many programming languages and platforms
+        %
+        \begin{itemize}
+            \item namely Python, Java, Ruby, PHP, C\#, JavaScript, Go, Elixir, Objective-C, Swift
+            \item via as many \alert{client libraries}
+        \end{itemize}
+
+        \vfill
+
+        \item The broker is written in Erlang
+        %
+        \begin{itemize}
+            \item can be started via its Docker container: \uurl{https://hub.docker.com/_/rabbitmq}
+        \end{itemize}
+
+        \vfill
+
+        \item Major abstractions
+        %
+        \begin{description}
+            \item[queues] | actual buffers storing messages
+            \item[exchanges] | gateways towards one or more queues
+            \item[routing] | the operation of selecting which queues a message should be forwarded to
+        \end{description}
+
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Workflow}
+
+    \begin{columns}
+        \begin{column}{.5\linewidth}
+            \includegraphics[width=\linewidth]{img/binding.png}
+        \end{column}
+        \begin{column}{.5\linewidth}
+            \begin{itemize}
+                \item[1-2] a \alert{producer} sends a message towards an \alert{exchange}
+
+                \medskip
+
+                \item[3] the exchange forwards a \emph{copy} of the message to \emph{a subset of} the queues which are \alert{bound} to the exchange
+                %
+                \begin{itemize}
+                    \item a \alert{binding} primitive is available
+                    \item the subsets depends on the routing
+                \end{itemize}
+
+                \medskip
+
+                \item[4] messages are buffered on the \alert{queues} (hosted by the \alert{broker})
+
+                \medskip
+
+                \item[5] consumers orderly pull messages from queues
+            \end{itemize}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+\begin{frame}{Exchanges}
+
+    Many sorts of exchanges exist:
+    %
+    \begin{center}
+        \includegraphics[width=.8\linewidth]{img/exchanges.png}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{Routing with Direct Exchanges}
+
+    \begin{itemize}
+        \item Messages are routed to queues in a \alert{round-robin} fashion
+
+        \bigskip
+
+        \item If there's just 1 queue, the routing is \alert{direct}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Routing with Fanout Exchanges}
+
+    \begin{itemize}
+        \item Messages are propagated to all bound queues
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Routing with Topic Exchanges}
+
+    \begin{center}
+        \includegraphics[width=.5\linewidth]{img/routing.png}
+    \end{center}
+
+    \bigskip
+
+    \begin{itemize}
+        \item Messages are published with a \alert{routing key}
+
+        \medskip
+
+        \item It is then routed to all queues that
+        %
+        \begin{enumerate}
+            \item have been bound to the exchange with a \alert{topic}\ldots
+            \item \ldots \alert{matching} the routing key
+        \end{enumerate}
+    \end{itemize}
+
+    \framebreak
+
+    \begin{block}{Routing keys}\ttfamily\centering
+        dot-saparated.sequences.of.words
+    \end{block}
+
+    \bigskip
+
+    \begin{block}{Topics}
+        \begin{itemize}
+            \item dot-separated sequences of words with placeholders:
+            %
+            \begin{description}
+                \item[\texttt{*}] | placeholder for a single word
+                \item[\texttt{\#}] | placeholder 0, 1, or more words
+            \end{description}
+        \end{itemize}
+    \end{block}
 
 \end{frame}
 
